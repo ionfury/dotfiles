@@ -17,6 +17,11 @@ tasks:
       - task: brew
       - task: link
 
+  linux:
+    desc: "Installs local environment configuration for linux"
+    cmds:
+      - task: link
+
   brew:
     desc: "Install Homebrew packages"
     cmds:
