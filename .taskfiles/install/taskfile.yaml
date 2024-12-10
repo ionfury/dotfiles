@@ -1,0 +1,45 @@
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+
+version: "3"
+
+vars:
+  TARGET_DIR: "$HOME"
+  TARGET_PACKAGES: "zsh tmux k9s"
+  ZSH_CUSTOM_DIR: "{{ .TARGET_DIR }}/.oh-my-zsh/custom"
+  ZSH_PLUGINS_DIR: "{{ .ZSH_CUSTOM_DIR }}/plugins"
+  ZSH_THEMES_DIR: "{{ .ZSH_CUSTOM_DIR }}/themes"
+
+tasks:
+  mac:
+    desc: "Install local environment configuration for macOS"
+    cmds:
+      - task: brew
+      - task: link
+
+  brew:
+    desc: "Install Homebrew packages"
+    cmds:
+      - brew bundle
+
+  link:
+    desc: "Stows target packages into the target directory."
+    preconditions:
+        - sh: test -d {{ .TARGET_DIR }}
+          msg: "The directory {{ .TARGET_DIR }} does not exist."
+    cmds:
+      - mkdir -p {{ .ZSH_CUSTOM_DIR }}
+      - mkdir -p {{ .ZSH_THEMES_DIR }}
+      - mkdir -p {{ .ZSH_PLUGINS_DIR }}
+      - for: { var: TARGET_PACKAGES }
+        cmd: stow --verbose --target="{{ .TARGET_DIR }}" --restow {{ .ITEM }}
+      - ln -sf {{ .PROJECT_DIR }}/powerlevel10k {{ .ZSH_THEMES_DIR }}/powerlevel10k
+      - ln -sf {{ .PROJECT_DIR }}/zsh-autosuggestions {{ .ZSH_PLUGINS_DIR }}/zsh-autosuggestions
+      - ln -sf {{ .PROJECT_DIR }}/zsh-syntax-highlighting {{ .ZSH_PLUGINS_DIR }}/zsh-syntax-highlighting
+
+  unlink:
+    desc: "Unstows target packages from the target directory."
+    cmds:
+      - rm -Rf {{ .ZSH_CUSTOM_DIR }}
+      - for: { var: TARGET_PACKAGES }
+        cmd: stow --verbose --target="{{ .TARGET_DIR }}" --delete {{ .ITEM }}
