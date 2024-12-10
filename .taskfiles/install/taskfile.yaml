@@ -25,7 +25,8 @@ tasks:
   brew:
     desc: "Install Homebrew packages"
     cmds:
-      - brew bundle
+      - cmd: brew bundle
+        ignore_error: true
 
   link:
     desc: "Stows target packages into the target directory."
